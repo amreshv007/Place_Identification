@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+</head>
+<body>
+<div class="header">
+  <a href="#default" class="logo">Persius</a>
+  <div class="header-right">
+      {% if user.is_authenticated %}
+      <a class="active" href="#">Hello! {{user.first_name}}</a>
+      <a href="logout">Logout</a>
+      {% else %}
+      <a href="signup">Signup</a>
+      <a href="login">Login</a>
+      {% endif %}
+  </div>
+</div>
+<div class="home">
+    {% if user.is_authenticated %}
+        <form method="POST" id="signup-form" class="signup-form" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2 class="form-title">Upload Image</h2>
+            <div class="form-group">
+                <input type="file" class="form-input" name="image" placeholder="Image"/>
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-input" name="place_name" placeholder="Place Name"/>
+            </div>
+            <div class="form-group">
+                <input type="submit" name="submit" id="submit" class="form-submit" value="Submit"/>
+            </div>
+        </form>
+        <div class="form-group">
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="container-fluid main">
+    <div class="row">
+        <div class="imggrid">
+            {% for im in imges %}
+                <div class="col-xs-12 post-type col-sm-6 col-md-4 col-lg-3">
+                    <div>
+                        <img class="img" src="{{im.image_url}}">
+                    </div>
+                    <div class="name">
+                        <span class="heading">Place : </span>
+                        <span class="in">{{im.place}}</span>
+                    </div>
+                    <div class="name">
+                        <span class="heading">Uploaded By : </span>
+                        <span class="in">
+                            {% if  im.user %}
+                            {{im.user.first_name}}
+                            {% else %}
+                            Anonymous
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="name">
+                        <span class="heading">Detected By : </span>
+                        <span class="in">
+                            {% if  im.guess_by %}
+                            <span style="color:green;font-weight: 700">{{im.guess_by}}</span>
+                            {% else %}
+                            <span style="color:black">No One</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="submit">
+                        <form method="POST" action="/persius/place">
+                            {% csrf_token %}
+                          <select name="agent_id" required>
+                            <option value="1">Select</option>
+                              {% for name in Places %}
+                                <option value="{{name.names}}">{{name.names}}</option>
+                              {% endfor %}
+                          </select>
+                            <input type="text" value="{{im.image_url}}" name="url" hidden />
+                          <input type="submit" value="Submit">
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
